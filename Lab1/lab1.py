@@ -15,3 +15,4 @@ print(f_sphere(x))
 print(f_rosen(x))
 print(f_ackley(x))
 
+
