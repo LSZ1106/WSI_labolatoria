@@ -52,27 +52,36 @@ def solver(eval_func, x0, krok, max_iter=5000, tol=1e-6):
     for _ in range(max_iter):
         g = gradient(eval_func, x, bounds=(lower, upper))
 
-        # warunek 1: mały gradient
+        # Rzutowanie gradientu na granice dziedziny
+        g[(x == lower) & (g > 0)] = 0
+        g[(x == upper) & (g < 0)] = 0
+
         if np.linalg.norm(g) < tol:
             powod = "mały gradient"
             break
 
-        # wykonaj krok gradientowy
         x_nowy = np.clip(x - krok * g, lower, upper)
+
+        if np.allclose(x, x_nowy, atol=1e-8, rtol=1e-8):
+            powod = "brak ruchu - uderzenie w granice dziedziny"
+            break
+
+        #  Obliczenie wartości funkcji dla nowego punktu
         f_nowy = float(eval_func(x_nowy))
 
-        # warunek 2: mała zmiana wartości funkcji
-        if abs(f_nowy - fx) < 1e-12:
-            powod = "mała zmiana f(x)"
-            x = x_nowy
-            historia.append(f_nowy)
-            break
+        #  Warunek 2: Mała zmiana wartości funkcji
+        # if abs(f_nowy - fx) < 1e-7:
+        #     powod = "mała zmiana f(x)"
+        #     x = x_nowy
+        #     historia.append(f_nowy)
+        #     break
 
         x = x_nowy
         fx = f_nowy
         historia.append(fx)
 
     return x, historia, powod
+
 
 
 if __name__ == "__main__":
@@ -84,10 +93,10 @@ if __name__ == "__main__":
         print("gradient:", gradient(f, x))
 
     for f in (f_sphere, f_rosen, f_ackley):
-        plt.figure(figsize=(9, 5))
+        fig, axes = plt.subplots(2, 3, figsize=(14, 8))
         print(f"\nWyniki dla {f.__name__}:")
 
-        for krok in alpha:
+        for ax, krok in zip(axes.flat, alpha):
             start = perf_counter()
             wynik, historia, powod = solver(f, x, krok)
             czas = perf_counter() - start
@@ -97,15 +106,15 @@ if __name__ == "__main__":
                 f"iteracje={len(historia)-1} | czas={czas:.4f} s | stop: {powod}"
             )
 
-            plt.plot(range(len(historia)), historia, label=f"alpha={krok}")
+            #ax.plot(range(len(historia)), historia, color="tab:blue", linewidth=1.5)
+            ax.plot(range(len(historia[:100])), historia[:100], color="tab:blue")
+            ax.set_title(f"α = {krok:g} ({powod})")
+            ax.set_yscale("symlog", linthresh=1e-8)
+            ax.set_xlabel("Numer iteracji t")
+            ax.set_ylabel("f(x_t)")
+            ax.grid(True, which="both", alpha=0.35)
 
-        plt.title(f"Zbieżność — {f.__name__}")
-        plt.xlabel("Numer iteracji t")
-        plt.ylabel("Wartość funkcji f(x_t)")
-        plt.yscale("symlog", linthresh=1e-8)
-
-        plt.legend()
-        plt.grid(True, which="both")
-        plt.tight_layout()
-        plt.savefig(f"{f.__name__}_zbieznosc.png")
-        plt.close()
+        fig.suptitle(f"Zbieżność {f.__name__} dla różnych kroków")
+        fig.tight_layout()
+        fig.savefig(f"{f.__name__}_zbieznosc.png", dpi=150)
+        plt.close(fig)
