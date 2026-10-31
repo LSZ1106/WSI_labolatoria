@@ -38,7 +38,7 @@ def gradient(f, x, h=1e-6, bounds=None):
     return g
 
 
-def solver(eval_func, x0, krok, max_iter=5000, tol=1e-6):
+def solver(eval_func, x0, krok, max_iter=200, tol=1e-6):
     x = np.array(x0, dtype=float).copy()
     lower = np.full_like(x, LOWER_BOUND)
     upper = np.full_like(x, UPPER_BOUND)
@@ -63,25 +63,17 @@ def solver(eval_func, x0, krok, max_iter=5000, tol=1e-6):
         x_nowy = np.clip(x - krok * g, lower, upper)
 
         if np.allclose(x, x_nowy, atol=1e-8, rtol=1e-8):
-            powod = "brak ruchu - uderzenie w granice dziedziny"
+            powod = "uderzenie w granice dziedziny"
             break
 
         #  Obliczenie wartości funkcji dla nowego punktu
         f_nowy = float(eval_func(x_nowy))
-
-        #  Warunek 2: Mała zmiana wartości funkcji
-        # if abs(f_nowy - fx) < 1e-7:
-        #     powod = "mała zmiana f(x)"
-        #     x = x_nowy
-        #     historia.append(f_nowy)
-        #     break
 
         x = x_nowy
         fx = f_nowy
         historia.append(fx)
 
     return x, historia, powod
-
 
 
 if __name__ == "__main__":
@@ -106,9 +98,8 @@ if __name__ == "__main__":
                 f"iteracje={len(historia)-1} | czas={czas:.4f} s | stop: {powod}"
             )
 
-            #ax.plot(range(len(historia)), historia, color="tab:blue", linewidth=1.5)
-            ax.plot(range(len(historia[:100])), historia[:100], color="tab:blue")
-            ax.set_title(f"α = {krok:g} ({powod})")
+            ax.plot(range(len(historia)), historia, color="tab:blue", linewidth=1.5)
+            ax.set_title(f"α = {krok:g}")
             ax.set_yscale("symlog", linthresh=1e-8)
             ax.set_xlabel("Numer iteracji t")
             ax.set_ylabel("f(x_t)")
