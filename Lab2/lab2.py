@@ -1,13 +1,15 @@
-"""Lab2: badanie zbieżności ES(mu+lambda)"""
+"""Lab2: badanie zbieżności ES(mu+lambda) i porównanie z gradientem prostym."""
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 from funkcje import FUNKCJE, WYMIARY, BUDZET_NA_WYMIAR, LICZBA_POWTORZEN
-from es import es_mu_plus_lambda
+from es import solver as solver_es
+from gradient import solver as solver_gd
 
 # Badane parametry: (mu, lambda, sigma0) dla ES oraz kroki dla gradientu.
 KONFIGURACJE_ES = [(3, 6, 30.0), (10, 20, 30.0), (5, 10, 1.0), (5, 10, 10.0)]
+KROKI_GD = [0.001, 0.01, 0.1]
 
 
 def usrednij(uruchom, budzet):
@@ -28,12 +30,12 @@ def main():
         budzet = BUDZET_NA_WYMIAR * wymiar
 
         for nazwa, funkcja, optimum in FUNKCJE:
-            print(f"\n {nazwa}, n={wymiar}, FE_max={budzet} ")
+            print(f"\n {nazwa}, n={wymiar}, FE_max={budzet}")
             fig, ax = plt.subplots(figsize=(8, 5.5))
 
             for mu, lam, sigma0 in KONFIGURACJE_ES:
                 srednia, koncowe = usrednij(
-                    lambda rng: es_mu_plus_lambda(
+                    lambda rng: solver_es(
                         funkcja, wymiar, budzet, mu, lam, sigma0, rng
                     ),
                     budzet,
@@ -47,7 +49,31 @@ def main():
                     f"f_best = {koncowe.mean():.4e} ± {koncowe.std():.2e}"
                 )
 
-            
+            for krok in KROKI_GD:
+                srednia, koncowe = usrednij(
+                    lambda rng: solver_gd(funkcja, wymiar, budzet, krok, rng),
+                    budzet,
+                )
+                ax.plot(
+                    np.maximum(srednia - optimum, 1e-12),
+                    linestyle="--",
+                    label=f"GD, α={krok:g}",
+                )
+                print(
+                    f"GD, α={krok:g}: "
+                    f"f_best = {koncowe.mean():.4e} ± {koncowe.std():.2e}"
+                )
+
+            ax.set_yscale("log")
+            ax.set_xlabel("Liczba ewaluacji funkcji celu")
+            ax.set_ylabel(f"f(x_best) - f*  (średnia z {LICZBA_POWTORZEN} uruchomień)")
+            ax.set_title(f"Zbieżność: {nazwa}, n={wymiar}")
+            ax.grid(True, which="both", alpha=0.35)
+            ax.legend()
+            fig.tight_layout()
+            fig.savefig(f"{nazwa}_n{wymiar}.png", dpi=150)
+            plt.close(fig)
+
 
 if __name__ == "__main__":
     main()
