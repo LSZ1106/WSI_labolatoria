@@ -4,8 +4,16 @@ import numpy as np
 
 
 def solver(
-    eval_func, wymiar, budzet, mu, lam, sigma0, rng,
-    lower=-100.0, upper=100.0, max_stagnacja=25,
+    eval_func,
+    wymiar,
+    budzet,
+    mu,
+    lam,
+    sigma0,
+    rng,
+    lower=-100.0,
+    upper=100.0,
+    max_stagnacja=25,
 ):
     tau = 1.0 / np.sqrt(2.0 * wymiar)
 

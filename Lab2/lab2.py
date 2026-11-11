@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 from funkcje import FUNKCJE, WYMIARY, BUDZET_NA_WYMIAR, LICZBA_POWTORZEN
 from es import solver as solver_es
 from gradient import solver as solver_gd
+from pathlib import Path
+
+KATALOG = Path(__file__).parent
 
 # Badane parametry: (mu, lambda, sigma0) dla ES oraz kroki dla gradientu.
 KONFIGURACJE_ES = [(3, 6, 30.0), (10, 20, 30.0), (5, 10, 1.0), (5, 10, 10.0)]
@@ -26,16 +29,31 @@ def usrednij(uruchom, budzet):
 
 
 def main():
-    for wymiar in WYMIARY:
-        budzet = BUDZET_NA_WYMIAR * wymiar
+    plt.rcParams.update(
+        {
+            "font.size": 14,
+            "axes.titlesize": 18,
+            "axes.labelsize": 16,
+            "xtick.labelsize": 14,
+            "ytick.labelsize": 14,
+            "legend.fontsize": 12,
+            "figure.titlesize": 22,
+        }
+    )
 
-        # Jeden wykres na wymiarowość: po jednym panelu dla każdej funkcji,
+    for nazwa, funkcja, optimum in FUNKCJE:
+        # Jeden wykres na funkcję: po jednym panelu dla każdej wymiarowości,
         # na każdym panelu krzywe ES i gradientu.
         fig, osie = plt.subplots(
-            1, len(FUNKCJE), figsize=(7 * len(FUNKCJE), 5.5), squeeze=False
+            1,
+            len(WYMIARY),
+            figsize=(14, 5.5),
+            squeeze=False,
+            sharey=True,
         )
 
-        for ax, (nazwa, funkcja, optimum) in zip(osie[0], FUNKCJE):
+        for ax, wymiar in zip(osie[0], WYMIARY):
+            budzet = BUDZET_NA_WYMIAR * wymiar
             print(f"\n {nazwa}, n={wymiar}, FE_max={budzet}")
 
             for mu, lam, sigma0 in KONFIGURACJE_ES:
@@ -70,15 +88,17 @@ def main():
                 )
 
             ax.set_yscale("log")
+            ax.tick_params(labelleft=True)
             ax.set_xlabel("Liczba ewaluacji funkcji celu")
-            ax.set_ylabel(f"f(x_best) - f*  (średnia z {LICZBA_POWTORZEN} uruchomień)")
-            ax.set_title(nazwa)
+            ax.set_ylabel("Różnica względem optimum")
+            ax.set_title(f"n={wymiar}")
             ax.grid(True, which="both", alpha=0.35)
-            ax.legend()
+            ax.legend(loc="upper right")
+            # ax.legend()
 
-        fig.suptitle(f"Zbieżność ES i gradientu, n={wymiar}")
+        # fig.suptitle(f"Zbieżność ES i gradientu, {nazwa}")
         fig.tight_layout()
-        fig.savefig(f"zbieznosc_n{wymiar}.png", dpi=150)
+        fig.savefig(KATALOG / f"zbieznosc_{nazwa}.png", dpi=150)
         plt.close(fig)
 
 

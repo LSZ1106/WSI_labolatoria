@@ -30,8 +30,14 @@ def gradient(f, x, h=1e-6, bounds=None):
 
 
 def solver(
-    eval_func, wymiar, budzet, krok, rng,
-    lower=LOWER_BOUND, upper=UPPER_BOUND, tol=1e-6,
+    eval_func,
+    wymiar,
+    budzet,
+    krok,
+    rng,
+    lower=LOWER_BOUND,
+    upper=UPPER_BOUND,
+    tol=1e-6,
 ):
     def f1(punkt):  # wartość funkcji celu w pojedynczym punkcie (1 ewaluacja)
         return float(np.asarray(eval_func(punkt.reshape(-1, 1)))[0])
@@ -44,7 +50,7 @@ def solver(
     historia = [najlepsza]
     powod = "budżet"
 
-    koszt_iteracji = 2 * wymiar + 1 
+    koszt_iteracji = 2 * wymiar + 1
 
     while len(historia) + koszt_iteracji <= budzet:
         g = gradient(eval_func, x, bounds=(lower, upper))

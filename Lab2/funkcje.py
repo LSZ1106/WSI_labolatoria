@@ -1,4 +1,4 @@
-#Funkcje celu: F3 i F18 z benchmarku CEC 2017 oraz funkcja kwadratowa.
+# Funkcje celu: F3 i F18 z benchmarku CEC 2017 oraz funkcja kwadratowa.
 
 import numpy as np
 
@@ -15,7 +15,7 @@ EDYCJA = CECEdition.CEC2017
 cec17 = CECEvaluator(EDYCJA, list(WYMIARY))
 
 
-# Każda funkcja przyjmuje macierz (wymiar, k) - punkty w kolumnach.
+# Każda funkcja przyjmuje macierz (wymiar, k)
 def f3(X):
     return np.asarray(cec17(3, np.asarray(X, dtype=np.float64)))
 
