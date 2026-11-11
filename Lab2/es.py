@@ -24,7 +24,7 @@ def solver(
         lam_eff = min(lam, budzet - len(historia))  # nie przekraczamy budżetu
 
         # Reprodukcja + mutacja (log-normalna samoadaptacja sigmy).
-        rodzice = rng.integers(0, mu, size=lam_eff)
+        rodzice = rng.integers(0, mu, size=lam_eff)  # jaki rodzic ma miec dziecko
         sigma_nowe = sigma[rodzice] * np.exp(tau * rng.standard_normal(lam_eff))
         X_nowe = X[:, rodzice] + sigma_nowe * rng.standard_normal((wymiar, lam_eff))
         X_nowe = np.clip(X_nowe, lower, upper)

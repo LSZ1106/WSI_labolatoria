@@ -29,9 +29,14 @@ def main():
     for wymiar in WYMIARY:
         budzet = BUDZET_NA_WYMIAR * wymiar
 
-        for nazwa, funkcja, optimum in FUNKCJE:
+        # Jeden wykres na wymiarowość: po jednym panelu dla każdej funkcji,
+        # na każdym panelu krzywe ES i gradientu.
+        fig, osie = plt.subplots(
+            1, len(FUNKCJE), figsize=(7 * len(FUNKCJE), 5.5), squeeze=False
+        )
+
+        for ax, (nazwa, funkcja, optimum) in zip(osie[0], FUNKCJE):
             print(f"\n {nazwa}, n={wymiar}, FE_max={budzet}")
-            fig, ax = plt.subplots(figsize=(8, 5.5))
 
             for mu, lam, sigma0 in KONFIGURACJE_ES:
                 srednia, koncowe = usrednij(
@@ -67,12 +72,14 @@ def main():
             ax.set_yscale("log")
             ax.set_xlabel("Liczba ewaluacji funkcji celu")
             ax.set_ylabel(f"f(x_best) - f*  (średnia z {LICZBA_POWTORZEN} uruchomień)")
-            ax.set_title(f"Zbieżność: {nazwa}, n={wymiar}")
+            ax.set_title(nazwa)
             ax.grid(True, which="both", alpha=0.35)
             ax.legend()
-            fig.tight_layout()
-            fig.savefig(f"{nazwa}_n{wymiar}.png", dpi=150)
-            plt.close(fig)
+
+        fig.suptitle(f"Zbieżność ES i gradientu, n={wymiar}")
+        fig.tight_layout()
+        fig.savefig(f"zbieznosc_n{wymiar}.png", dpi=150)
+        plt.close(fig)
 
 
 if __name__ == "__main__":
